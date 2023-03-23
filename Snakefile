@@ -1,4 +1,4 @@
-SAMPLES = ["1000463191", "1000463386", "1000465755", "1000548083", "1000463192", "1000465563", "1000536513"]
+SAMPLES = ["1000463191", "1000463386", "1000465755", "1000548083", "1000463192", "1000465563", "1000536513", "100045744501", "100045751801", "100045756501", "100045771201"]
 
 rule all:
     input:
@@ -35,9 +35,12 @@ rule mapping_depth:
     input:
         "mapped_reads/{sample}_aln.bam"
     output:
-        "mapped_reads/{sample}_aln_depth.tsv"
-    shell:
-        "samtools depth -a {input} > {output}"
+        depth="mapped_reads/{sample}_aln_depth.tsv",
+        coverage="mapped_reads/{sample}_aln_coverage.tsv"
+    run:
+        shell("samtools depth -a {input} > {output.depth}")
+        # get coverage statistics and only keep rows where numreads > 0
+        shell("samtools coverage {input} | awk 'NR == 1 || $4 > 0' > {output.coverage}")
 
 rule create_consensus:
     input:
