@@ -4,7 +4,7 @@
 ## Data generation
 This Snakemake workflow was built to create consensus sequences from Nanopore sequencing using the four-primer PCR protocol. This type of library preparation and sequencing yields sequences spanning the whole amplicon (including the user-defined primer sequences).
 
-<img src="figures/Four-primer-PCR.svg" width="600">
+![four primer PCR schema](figures/Four-primer-PCR.svg)
 
 Since raw sequencing data is split across multiple compressed fastq files, they have to be combined first into one (e.g. by using `zcat`).
 
