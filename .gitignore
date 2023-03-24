@@ -1,5 +1,6 @@
 .DS_Store
 .snakemake/
+._Snakefile
 assembled_reads/
 consensus_sequences/
 consensus_sequences_target/
