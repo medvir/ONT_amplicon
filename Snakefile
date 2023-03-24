@@ -37,20 +37,38 @@ rule mapping_depth:
     output:
         depth="mapped_reads/{sample}_aln_depth.tsv",
         coverage="mapped_reads/{sample}_aln_coverage.tsv"
-    run:
-        shell("samtools depth -a {input} > {output.depth}")
+    shell:
+        """
+        samtools depth -a {input} > {output.depth}
+
         # get coverage statistics and only keep rows where numreads > 0
-        shell("samtools coverage {input} | awk 'NR == 1 || $4 > 0' > {output.coverage}")
+        samtools coverage {input} | awk 'NR == 1 || $4 > 0' > {output.coverage}
+        """
 
 rule create_consensus:
     input:
         "mapped_reads/{sample}_aln.bam"
+    params:
+        # factor which defines the minimal depth (min_depth=mapped_reads/min_depth_factor)
+        # to set a variable threshold based on how many reads were mapped per sample, this accounts for variability in sequenced reads
+        # factor has to be an integer
+        min_depth_factor="100",
+        # define minimal depth to fall back when the min_depth calculated as described above is lower than this threshold
+        min_depth_reads=10
     output:
         "consensus_sequences/{sample}_consensus_raw.fasta"
-    run:
-        shell("samtools consensus -f fasta -a -l 0 -m simple --ambig --use-qual --het-fract 0.25 --min-depth 30 {input} -o {output}")
+    shell:
+        """
+        mapped_reads=$(samtools view -c -F 4 {input})
+        min_depth=$(( mapped_reads / {params.min_depth_factor} ))
+        # choose whatever number is larger for the actual min_depth
+        min_depth=$(( min_depth > {params.min_depth_reads} ? min_depth : {params.min_depth_reads} ))
+
+        samtools consensus -f fasta -a -l 0 -m simple --ambig --use-qual --het-fract 0.25 --min-depth $min_depth {input} -o {output}
+
         # replace reference accession number with sample id in the fasta header
-        shell("sed -i -r 's/^>.*(\\|.*\\|.*$)/>{wildcards.sample}\\1/g' {output}")
+        sed -i -r 's/^>.*(\\|.*\\|.*$)/>{wildcards.sample}\\1/g' {output}
+        """
 
 rule filter_consensus:
     input:
@@ -58,5 +76,6 @@ rule filter_consensus:
     output:
         "consensus_sequences/{sample}_consensus.fasta"
     shell:
-        # Filter sequence with more than ns_max_p percentage of Ns
-        "prinseq -fasta {input} -ns_max_p 5 -line_width 0 -out_bad null -out_good stdout > {output}"
+        # Filter sequence with more than ns_max_p percentage of Ns and remove exact duplicates
+        # use the stdout option to also write a (empty) file even if no sequence remains 
+        "prinseq -fasta {input} -ns_max_p 5 -derep 1 -line_width 0 -out_bad null -out_good stdout > {output}"
