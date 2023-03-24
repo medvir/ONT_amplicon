@@ -7,7 +7,7 @@ rule all:
         apping_coverage=expand("mapped_reads/{sample}_aln_coverage.tsv", sample=config["samples"]),
         consensus_sequence=expand("consensus_sequences/{sample}_consensus.fasta", sample=config["samples"]),
 
-rule extract_amplicon_from_reads:
+rule extract_amplicon:
     input:
         "data/samples/{sample}_fastq_pass.fastq"
     params:
@@ -32,7 +32,7 @@ rule mapping_reads:
     shell:
         "minimap2 -ax map-ont -t {threads} {input.reference} {input.reads} | samtools sort -@ {threads} > {output}"
 
-rule samtools_index:
+rule index_alignment:
     input:
         "mapped_reads/{sample}_aln.bam"
     output:
@@ -41,23 +41,20 @@ rule samtools_index:
     shell:
         "samtools index -@ {threads} {input}"
 
-rule mapping_depth:
+rule compute_coverage:
     input:
         "mapped_reads/{sample}_aln.bam"
     output:
-        "mapped_reads/{sample}_aln_depth.tsv",
+        depth="mapped_reads/{sample}_aln_depth.tsv",
+        coverage="mapped_reads/{sample}_aln_coverage.tsv"
     threads: config["threads"]
     shell:
-        "samtools depth -@ {threads} -a {input} > {output}"
+        """
+        samtools depth -@ {threads} -a {input} > {output.depth}
 
-rule mapping_coverage:
-    input:
-        "mapped_reads/{sample}_aln.bam"
-    output:
-        "mapped_reads/{sample}_aln_coverage.tsv"
-    shell:
         # get coverage statistics and only keep rows where numreads > 0
-        "samtools coverage {input} | awk 'NR == 1 || $4 > 0' > {output}"
+        samtools coverage {input} | awk 'NR == 1 || $4 > 0' > {output.coverage}
+        """
 
 rule create_consensus:
     input:
