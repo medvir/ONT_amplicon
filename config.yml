@@ -3,7 +3,7 @@ samples: ["1000463191", "1000463386", "1000465755", "1000548083", "1000463192", 
 primer_forward: "CCAGCACTGACAGCAGYNGARAYNGG"
 primer_reverse: "TACTGGACCACCTGGNGGNAYRWACAT"
 
-reference: "data/references/Enterovirus_all_without_primer.fasta"
+reference: "references/Enterovirus_all_without_primer.fasta"
 
 # factor which defines the minimal depth (min_depth=mapped_reads/min_depth_factor)
 # to set a variable threshold based on how many reads were mapped per sample, this accounts for variability in sequenced reads
@@ -17,5 +17,3 @@ het_fract: 0.25
 
 # threshold to filter consensus sequences with more than ns_max_p percentage of Ns
 ns_max_p: 5
-
-threads: 8

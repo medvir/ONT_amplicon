@@ -17,10 +17,9 @@ rule extract_amplicon:
         amplicon_end=-(len(config["primer_reverse"])+1)
     output:
         "filtered_reads/{sample}_fastq_pass_amplicon.fastq"
-    threads: config["threads"]
     shell:
         # extract amplicon by perfect primer match and remove primer parts
-        "cat {input} | seqkit amplicon -j {threads} -F {params.primer_forward} -R {params.primer_reverse} -r {params.amplicon_start}:{params.amplicon_end} > {output}"
+        "cat {input} | seqkit amplicon -F {params.primer_forward} -R {params.primer_reverse} -r {params.amplicon_start}:{params.amplicon_end} > {output}"
 
 rule mapping_reads:
     input:
@@ -28,18 +27,16 @@ rule mapping_reads:
         reads="filtered_reads/{sample}_fastq_pass_amplicon.fastq"
     output:
         "mapped_reads/{sample}_aln.bam"
-    threads: config["threads"]
     shell:
-        "minimap2 -ax map-ont -t {threads} {input.reference} {input.reads} | samtools sort -@ {threads} > {output}"
+        "minimap2 -ax map-ont {input.reference} {input.reads} | samtools sort > {output}"
 
 rule index_alignment:
     input:
         "mapped_reads/{sample}_aln.bam"
     output:
         "mapped_reads/{sample}_aln.bam.bai"
-    threads: config["threads"]
     shell:
-        "samtools index -@ {threads} {input}"
+        "samtools index {input}"
 
 rule compute_coverage:
     input:
@@ -47,10 +44,9 @@ rule compute_coverage:
     output:
         depth="mapped_reads/{sample}_aln_depth.tsv",
         coverage="mapped_reads/{sample}_aln_coverage.tsv"
-    threads: config["threads"]
     shell:
         """
-        samtools depth -@ {threads} -a {input} > {output.depth}
+        samtools depth -a {input} > {output.depth}
 
         # get coverage statistics and only keep rows where numreads > 0
         samtools coverage {input} | awk 'NR == 1 || $4 > 0' > {output.coverage}
@@ -65,7 +61,6 @@ rule create_consensus:
         het_fract=config["het_fract"]
     output:
         "consensus_sequences/{sample}_consensus_raw.fasta"
-    threads: config["threads"]
     shell:
         """
         mapped_reads=$(samtools view -c -F 4 {input})
@@ -73,7 +68,7 @@ rule create_consensus:
         # choose whatever number is larger for the actual min_depth
         min_depth=$(( min_depth > {params.min_depth_reads} ? min_depth : {params.min_depth_reads} ))
 
-        samtools consensus -@ {threads} -f fasta -a -l 0 -m simple --ambig --use-qual --het-fract {params.het_fract} --min-depth $min_depth {input} -o {output}
+        samtools consensus -f fasta -a -l 0 -m simple --ambig --use-qual --het-fract {params.het_fract} --min-depth $min_depth {input} -o {output}
 
         # replace reference accession number with sample id in the fasta header
         sed -i -r 's/^>.*(\\|.*\\|.*$)/>{wildcards.sample}\\1/g' {output}
