@@ -5,6 +5,7 @@ assembled_reads/
 consensus_sequences/
 consensus_sequences_target/
 data/
+references/old/
 filtered_reads/
 mapped_reads/
 mapped_reads_target/
