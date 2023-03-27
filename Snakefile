@@ -1,22 +1,24 @@
 configfile: "config/config.yml"
 
+SAMPLES, = glob_wildcards("reads_raw/{sample}_fastq_pass.fastq")
+
 rule all:
     input:
-        mapping_index=expand("mapped_reads/{sample}_aln.bam.bai", sample=config["samples"]),
-        mapping_depth=expand("mapped_reads/{sample}_aln_depth.tsv", sample=config["samples"]),
-        apping_coverage=expand("mapped_reads/{sample}_aln_coverage.tsv", sample=config["samples"]),
-        consensus_sequence=expand("consensus_sequences/{sample}_consensus.fasta", sample=config["samples"]),
+        mapping_index=expand("mapped_reads/{sample}_aln.bam.bai", sample=SAMPLES),
+        mapping_depth=expand("mapped_reads/{sample}_aln_depth.tsv", sample=SAMPLES),
+        apping_coverage=expand("mapped_reads/{sample}_aln_coverage.tsv", sample=SAMPLES),
+        consensus_sequence=expand("consensus_sequences/{sample}_consensus.fasta", sample=SAMPLES),
 
 rule extract_amplicon:
     input:
-        "data/samples/{sample}_fastq_pass.fastq"
+        "reads_raw/{sample}_fastq_pass.fastq"
     params:
         primer_forward=config["primer_forward"],
         primer_reverse=config["primer_reverse"],
         amplicon_start=len(config["primer_forward"])+1,
         amplicon_end=-(len(config["primer_reverse"])+1)
     output:
-        "filtered_reads/{sample}_fastq_pass_amplicon.fastq"
+        "reads_filtered/{sample}_fastq_pass_amplicon.fastq"
     shell:
         # extract amplicon by perfect primer match and remove primer parts
         "cat {input} | seqkit amplicon -F {params.primer_forward} -R {params.primer_reverse} -r {params.amplicon_start}:{params.amplicon_end} > {output}"
@@ -24,7 +26,7 @@ rule extract_amplicon:
 rule mapping_reads:
     input:
         reference=config["reference"],
-        reads="filtered_reads/{sample}_fastq_pass_amplicon.fastq"
+        reads="reads_filtered/{sample}_fastq_pass_amplicon.fastq"
     output:
         "mapped_reads/{sample}_aln.bam"
     shell:
