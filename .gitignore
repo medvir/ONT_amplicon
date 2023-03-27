@@ -1,11 +1,7 @@
 .DS_Store
 .snakemake/
-._Snakefile
-assembled_reads/
 consensus_sequences/
-consensus_sequences_target/
-data/
+reads_filtered/
+reads_raw/
 references/old/
-filtered_reads/
 mapped_reads/
-mapped_reads_target/
