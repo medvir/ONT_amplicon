@@ -5,7 +5,6 @@ channels:
   - defaults
 dependencies:
   - snakemake-minimal=7.25.0
-  - pandas=1.5.3
   - seqkit=2.4.0
   - minimap2=2.24
   - samtools=1.16.1
