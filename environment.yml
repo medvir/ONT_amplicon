@@ -4,8 +4,9 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - prinseq=0.20.4
-  - seqkit=2.3.1
+  - snakemake-minimal=7.25.0
+  - pandas=1.5.3
+  - seqkit=2.4.0
   - minimap2=2.24
-  - snakemake-minimal=7.24.2
   - samtools=1.16.1
+  - prinseq=0.20.4
