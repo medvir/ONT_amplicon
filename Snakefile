@@ -1,13 +1,23 @@
-configfile: "config/config.yml"
+import pandas as pd
 
-SAMPLES, = glob_wildcards("reads_raw/{sample}_fastq_pass.fastq")
+samples = pd.read_table("config/samples.tsv").set_index("sample_name", drop=False)
+
+configfile: "config/config.yml"
 
 rule all:
     input:
-        mapping_index=expand("mapped_reads/{sample}_aln.bam.bai", sample=SAMPLES),
-        mapping_depth=expand("mapped_reads/{sample}_aln_depth.tsv", sample=SAMPLES),
-        apping_coverage=expand("mapped_reads/{sample}_aln_coverage.tsv", sample=SAMPLES),
-        consensus_sequence=expand("consensus_sequences/{sample}_consensus.fasta", sample=SAMPLES),
+        mapping_index=expand("mapped_reads/{sample.sample_name}_aln.bam.bai", sample=samples.itertuples()),
+        mapping_depth=expand("mapped_reads/{sample.sample_name}_aln_depth.tsv", sample=samples.itertuples()),
+        apping_coverage=expand("mapped_reads/{sample.sample_name}_aln_coverage.tsv", sample=samples.itertuples()),
+        consensus_sequence=expand("consensus_sequences/{sample.sample_name}_consensus.fasta", sample=samples.itertuples()),
+
+rule combine_reads:
+    input:
+        samplesheet_path="config/samples.tsv"
+    output:
+        expand("reads_raw/{sample.sample_name}_fastq_pass.fastq", sample=samples.itertuples())
+    script:
+        "scripts/combine_reads.R"
 
 rule extract_amplicon:
     input:
