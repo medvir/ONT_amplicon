@@ -10,17 +10,18 @@ This Snakemake workflow was built to create consensus sequences from Nanopore se
 
 ## Config file required
 
-Different parameter values have to be specified and provided in the [`config file`](config.yml).
+Different parameter values have to be specified and provided in the [config file](config/config.yml).
 
 ## Metadata required
 
-Before we can run the Snakemake workflow, metadata for all samples which should be processed has to be listed in the `config/samples.tsv` table.  
+Before we can run the Snakemake workflow, metadata for all samples which should be processed has to be listed in the [`config/samples.tsv`](config/samples.tsv) table.  
 Required columns are:  
 
 - `sample_name` which will be the filename and part of the fasta header of the output  
 - `run_name`, `flowcell_name`, and `barcode_name` are the exact directory names where the raw data is stored  
 
-On timavo, the final path to the raw fastq files is `/data/GridION/GridIONOutput/{run_name}/{flowcell_name}/*/fastq_pass/{barcode_name}/`.
+On timavo, the final path to the raw fastq files is:  
+`/data/GridION/GridIONOutput/{run_name}/{flowcell_name}/*/fastq_pass/{barcode_name}/`
 
 ## Software required
 
@@ -34,7 +35,7 @@ They are also listed in the [`environment.yml`](environment.yml) document.
 **samtools** v1.16.1  
 **prinseq** v0.20.4  
 
-On timavo all these tools are installed in the `ONT_amplicon` environment which can be activated with `conda activate ONT_amplicon`.
+On timavo all these tools are installed in the ONT_amplicon environment which can be activated with `conda activate ONT_amplicon`.
 
 ## Rules
 
@@ -43,12 +44,13 @@ The following figure shows a directed acyclic graph (DAG) which helps visualize 
 
 ![DAG of all rules](figures/dag.svg)
 
-This plot can be created by executing `snakemake --rulegraph | grep -v "\-> 0\|0\[label = \"all\"" | dot -Tsvg -o figures/dag.svg`.
+This plot can be created by executing:  
+`snakemake --rulegraph | grep -v "\-> 0\|0\[label = \"all\"" | dot -Tsvg -o figures/dag.svg`
 
 ### all
 
 This pseudo-rule lists all files that should be created and combines all rules explained below.  
-Running this rule executes all processes at once for the parameter values specified in the [`config file`](config/config.yml) and the samples listed in the [`samples file`](config/samples.tsv). It is the simplest way to execute the whole workflow and can be run using the following command:  
+Running this rule executes all processes at once for the parameter values specified in the [config file](config/config.yml) and the samples listed in the [samples file](config/samples.tsv). It is the simplest way to execute the whole workflow and can be run using the following command:  
 
 ```bash
 snakemake --cores 8
@@ -92,11 +94,11 @@ There are two very important parameters:
 
 `--min-depth` itself is defined by two parameters specified in the [`config file`](config.yml):  
 
-- `min_depth_factor` defines the initial minimal depth ($min\_depth = \frac{mapped\_reads}{min\_depth\_factor}$) to set a variable threshold based on how many reads were mapped per sample, this accounts for variability in sequenced reads (has to be an integer)  
+- `min_depth_factor` defines the initial minimal depth ($min_depth = \frac{mapped_reads}{min_depth_factor}$) to set a variable threshold based on how many reads were mapped per sample, this accounts for variability in sequenced reads (has to be an integer)  
 - `min_depth_reads` defines minimal depth to fall back when the min_depth calculated as described above is lower than this threshold  
 
 The calculation of the min_depth can be summarised as follows:  
-$min\_depth = max(\frac{mapped\_reads}{min\_depth\_factor}, min\_depth\_reads)$
+$min_depth = max(\frac{mapped_reads}{min_depth_factor}, min_depth_reads)$
 
 ### filter_consensus
 
