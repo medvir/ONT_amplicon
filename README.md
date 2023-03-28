@@ -29,7 +29,7 @@ Listed below are all primary software tools (without dependencies) and their ver
 They are also listed in the [`environment.yml`](environment.yml) document.  
 
 **snakemake-minimal** v7.25.0  
-**pandas** v1.5.3
+**pandas** v1.5.3  
 **seqkit** v2.4.0  
 **minimap2** v2.24  
 **samtools** v1.16.1  
@@ -94,11 +94,11 @@ There are two very important parameters:
 
 `--min-depth` itself is defined by two parameters specified in the [`config file`](config.yml):  
 
-- `min_depth_factor` defines the initial minimal depth ($min_depth = \frac{mapped_reads}{min_depth_factor}$) to set a variable threshold based on how many reads were mapped per sample, this accounts for variability in sequenced reads (has to be an integer)  
+- `min_depth_factor` defines the initial minimal depth ($min_depth = \frac{mapped\\_reads}{min\\_depth\\_factor}$) to set a variable threshold based on how many reads were mapped per sample, this accounts for variability in sequenced reads (has to be an integer)  
 - `min_depth_reads` defines minimal depth to fall back when the min_depth calculated as described above is lower than this threshold  
 
 The calculation of the min_depth can be summarised as follows:  
-$min_depth = max(\frac{mapped_reads}{min_depth_factor}, min_depth_reads)$
+$min\\_depth = max(\frac{mapped\\_reads}{min\\_depth\\_factor}, min\\_depth\\_reads)$
 
 ### filter_consensus
 
