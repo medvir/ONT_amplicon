@@ -94,7 +94,7 @@ There are two very important parameters:
 
 `--min-depth` itself is defined by two parameters specified in the [`config file`](config.yml):  
 
-- `min_depth_factor` defines the initial minimal depth ($min_depth = \frac{mapped\\_reads}{min\\_depth\\_factor}$) to set a variable threshold based on how many reads were mapped per sample, this accounts for variability in sequenced reads (has to be an integer)  
+- `min_depth_factor` defines the initial minimal depth ($min\\_depth = \frac{mapped\\_reads}{min\\_depth\\_factor}$) to set a variable threshold based on how many reads were mapped per sample, this accounts for variability in sequenced reads (has to be an integer)  
 - `min_depth_reads` defines minimal depth to fall back when the min_depth calculated as described above is lower than this threshold  
 
 The calculation of the min_depth can be summarised as follows:  
