@@ -6,9 +6,6 @@ channels:
 dependencies:
   - snakemake-minimal=7.25.0
   - pandas=1.5.3
-  - r-base=4.2.2
-  - r-dplyr=1.1.1
-  - r-purrr=1.0.1
   - seqkit=2.4.0
   - minimap2=2.24
   - samtools=1.16.1

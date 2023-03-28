@@ -1,6 +1,15 @@
 import pandas as pd
 
-samples = pd.read_table("config/samples.tsv").set_index("sample_name", drop=False)
+samples = pd.read_table("config/samples.tsv", dtype = str).set_index("sample_name", drop=False)
+
+def get_run_name(wildcards):
+    return samples.loc[wildcards.sample]["run_name"]
+
+def get_flowcell_name(wildcards):
+    return samples.loc[wildcards.sample]["flowcell_name"]
+
+def get_barcode_name(wildcards):
+    return samples.loc[wildcards.sample]["barcode_name"]
 
 configfile: "config/config.yml"
 
@@ -12,12 +21,14 @@ rule all:
         consensus_sequence=expand("consensus_sequences/{sample.sample_name}_consensus.fasta", sample=samples.itertuples()),
 
 rule combine_reads:
-    input:
-        samplesheet_path="config/samples.tsv"
+    params:
+        run_name=get_run_name,
+        flowcell_name=get_flowcell_name,
+        barcode_name=get_barcode_name
     output:
-        expand("reads_raw/{sample.sample_name}_fastq_pass.fastq", sample=samples.itertuples())
-    script:
-        "scripts/combine_reads.R"
+        "reads_raw/{sample}_fastq_pass.fastq"
+    shell:
+        "zcat /data/GridION/GridIONOutput/{params.run_name}/{params.flowcell_name}/*/fastq_pass/{params.barcode_name}/*.fastq.gz > {output}"
 
 rule extract_amplicon:
     input:
